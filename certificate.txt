@@ -1,0 +1,9 @@
+Version: 1
+Serial Number: 1234567890
+Signature Algorithm: sha256WithRSAEncryption
+Issuer: CN=Test Certificate Authority,O=Test Org,C=US
+Validity Not Before: 20230101000000
+Validity Not After: 20240101000000
+Subject: CN=Test Subject,O=Test Org,C=US
+Subject Public Key Info: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtvr9T8ZU2HK
+Trust Level: 5
