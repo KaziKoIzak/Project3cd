@@ -7,6 +7,9 @@
 *                                  RSF    11/14/20
 *
 ****************************************************/
+
+// https://stackoverflow.com/questions/11952898/c-send-and-receive-file
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -125,6 +128,23 @@ int main(int argc , char *argv[])
 	intToBinaryArray(sharedKey, array);
 	copyerArray(array);
 	keys();
+
+
+	//Write new stuff here
+	/* SERVER sending certificate / chain / CRL to CLIENT
+		1. client receives each piece of data individually
+		2. client unflattens data into an instance of Certificate
+		3. client hashes the Certificate to verify cert hasn't changed
+		4. same process for a CRL
+	*/
+
+
+
+
+
+
+
+
 
 	//Get data from keyboard and send  to server
 	printf("What do you want to send to the server. (b for bye)\n");
