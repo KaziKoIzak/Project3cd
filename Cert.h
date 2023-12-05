@@ -45,10 +45,10 @@ void Certifier() {
         }
 
         if(!flag) {
-            ch = hash(c, hashKey);
+            ch = hash(c);
             flag = true;
         } else {
-            ch = hash(c, hashKey);
+            ch = hash(c);
         }
     } while(1);
 
@@ -75,10 +75,10 @@ void Certifier() {
         }
 
         if(!flag) {
-            ch = hash(c, hashKey);
+            ch = hash(c);
             flag = true;
         } else {
-            ch = hash(c, hashKey);
+            ch = hash(c);
         }
     } while(1);
 
