@@ -20,6 +20,7 @@
 #include<stdlib.h>
 #include "Rand.h"
 #include "RSA.h"
+#include "Cert.h"
 
 void intToBinaryArray(unsigned int num, int* binaryArray) {
     for(int i = 9; i >= 0; i--) {
@@ -143,6 +144,13 @@ int main(int argc , char *argv[])
 	intToBinaryArray(sharedKey, array);
 	copyerArray(array);
 	keys();
+
+	Certificate Send;
+	Certifier(&Send);
+	char buffed[sizeof(Send)];
+	memcpy(buffed, &Send, sizeof(Send));
+
+	send(new_socket, buffed, sizeof(buffed), 0);
 
 	//Receive a message from client
 	while( (read_size = recv(new_socket , client_message , 100 , 0)) > 0 )

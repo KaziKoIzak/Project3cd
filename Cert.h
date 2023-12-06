@@ -22,12 +22,11 @@ typedef struct {
 void readCertificate(const char *filename, Certificate *cert);
 bool verifyCert(Certificate* cert, char* currentDate, unsigned char currentHash);
 
-void Certifier() {
+void Certifier(Certificate* readCert) {
     //Manually change the "current date" to check if certificate is within its valid timeframe
     char currentDate[] = "20231205092956";// YYYY MM DD HH MM SS
 
     // Read the certificate from the file
-    Certificate readCert;
     readCertificate("certificate.txt", &readCert);
 
     // Hash the certificate

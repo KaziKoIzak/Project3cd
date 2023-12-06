@@ -7,9 +7,6 @@
 *                                  RSF    11/14/20
 *
 ****************************************************/
-
-// https://stackoverflow.com/questions/11952898/c-send-and-receive-file
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -24,6 +21,11 @@
 #include "Rand.h"
 #include "RSA.h"
 #include "Cert.h"
+
+void deserializeCertificate(const char *buffer, Certificate *cert)
+{
+	memcpy(cert, buffer, sizeof(Certificate));
+}
 
 void intToBinaryArray(unsigned int num, int* binaryArray) {
     for(int i = 9; i >= 0; i--) {
@@ -129,22 +131,12 @@ int main(int argc , char *argv[])
 	copyerArray(array);
 	keys();
 
+	Certificate recievedCertificat;
+	char buffend[sizeof(Certificate)];
+	recv(socket_desc, buffend, sizeof(buffend), 0);
+	deserializeCertificate(buffend, &recievedCertificat);
 
-	//Write new stuff here
-	/* SERVER sending certificate / chain / CRL to CLIENT
-		1. client receives each piece of data individually
-		2. client unflattens data into an instance of Certificate
-		3. client hashes the Certificate to verify cert hasn't changed
-		4. same process for a CRL
-	*/
-
-
-
-
-
-
-
-
+	printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s", recievedCertificat.version, recievedCertificat.serialNumber, recievedCertificat.signatureAlgorithm, recievedCertificat.issuer, recievedCertificat.validityNotBefore, recievedCertificat.validityNotAfter, recievedCertificat.subject, recievedCertificat.subjectPublicKeyInfo, recievedCertificat.trustLevel);
 
 	//Get data from keyboard and send  to server
 	printf("What do you want to send to the server. (b for bye)\n");

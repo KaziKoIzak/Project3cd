@@ -437,7 +437,7 @@ void keys(){
     copyArray(key, subKey2, 8);
 }
 
-char hash(unsigned char c, long long key) {
+char hash(unsigned char c) {
     charToBinary(c, plaintext);
     xorArrays(plaintext, IV, 8, plaintext);
     Encrypt();
