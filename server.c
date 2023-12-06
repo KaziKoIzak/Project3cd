@@ -152,14 +152,24 @@ int main(int argc , char *argv[])
 
 	send(new_socket, buffed, sizeof(buffed), 0);
 
-	char* crlBuffer[100];
-	char co;
-	FILE* crlFile = fopen("CRL.txt", "r");
-	while((co = fgetc(crlFile)) != EOF) {
-		strcat(crlBuffer, co);
-	}
+	FILE *file = fopen("CRL.txt", "r");
 
-	send(new_socket, crlBuffer, sizeof(crlBuffer), 0);
+	char line[1024];
+	char concatenatedString[1024];
+	while(fgets(line, sizeof(line), file) != NULL)
+	{
+		char *newline = strchr(line, '\n');
+		if(newline != NULL)
+		{
+			*newline = '\0';
+		}
+		strcat(concatenatedString, line);
+	}
+		printf("%s\n", concatenatedString);
+
+	send(new_socket, concatenatedString, strlen(concatenatedString), 0);
+
+	fclose(file);
 	
 
 	//Receive a message from client
