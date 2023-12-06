@@ -146,11 +146,21 @@ int main(int argc , char *argv[])
 	keys();
 
 	Certificate Send;
-	Certifier(&Send);
+	readCertificate("certificate.txt", &Send);
 	char buffed[sizeof(Send)];
 	memcpy(buffed, &Send, sizeof(Send));
 
 	send(new_socket, buffed, sizeof(buffed), 0);
+
+	char* crlBuffer[100];
+	char co;
+	FILE* crlFile = fopen("CRL.txt", "r");
+	while((co = fgetc(crlFile)) != EOF) {
+		strcat(crlBuffer, co);
+	}
+
+	send(new_socket, crlBuffer, sizeof(crlBuffer), 0);
+	
 
 	//Receive a message from client
 	while( (read_size = recv(new_socket , client_message , 100 , 0)) > 0 )
