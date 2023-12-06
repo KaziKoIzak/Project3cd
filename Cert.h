@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <time.h>
 #include <string.h>
+#include <stdlib.h>
 
 // A structure to hold the certificate fields
 typedef struct {
@@ -20,14 +21,35 @@ typedef struct {
 
 // A function to read the certificate from a file
 void readCertificate(const char *filename, Certificate *cert);
-bool verifyCert(Certificate* cert, char* currentDate, unsigned char currentHash);
+int verifyCert(Certificate* cert, char* currentDate, unsigned char currentHash);
+void writeCertificate(const char *filename, const Certificate* cert);
+
+void writeCertificate(const char *filename, const Certificate* cert) {
+    FILE *file = fopen(filename, "w");
+    if (!file) {
+        printf("Error opening file");
+        return;
+    }
+
+    fprintf(file, "Version: %s\n", cert->version);
+    fprintf(file, "Serial Number: %s\n", cert->serialNumber);
+    fprintf(file, "Signature Algorithm: %s\n", cert->signatureAlgorithm);
+    fprintf(file, "Issuer: %s\n", cert->issuer);
+    fprintf(file, "Validity Not Before: %s\n", cert->validityNotBefore);
+    fprintf(file, "Validity Not After: %s\n", cert->validityNotAfter);
+    fprintf(file, "Subject: %s\n", cert->subject);
+    fprintf(file, "Subject Public Key Info: %s\n", cert->subjectPublicKeyInfo);
+    fprintf(file, "Trust Level: %s\n", cert->trustLevel);
+
+    fclose(file);
+}
 
 void Certifier(Certificate* readCert) {
     //Manually change the "current date" to check if certificate is within its valid timeframe
     char currentDate[] = "20231205092956";// YYYY MM DD HH MM SS
 
     // Read the certificate from the file
-    readCertificate("certificate.txt", &readCert);
+    readCertificate("certificate.txt", readCert);
 
     // Hash the certificate
     bool flag = false;
@@ -54,19 +76,20 @@ void Certifier(Certificate* readCert) {
     fclose(hashFileCert);
 
     unsigned char uch = ch;
-    bool certIsValid = verifyCert(&readCert, currentDate, uch);
-    if (certIsValid) {
+    int certIsValid = verifyCert(readCert, currentDate, uch);
+    printf("verification function returned %d", certIsValid);
+
+    if (certIsValid == 1) {
         printf("Cert is valid and hashes to: %c\n", uch);
     }
-
-
 
     // Hash the CRL
     flag = false;
     // keys(hashKey);
 
+
     FILE* crlFileCert = fopen("CRL.txt", "r");
-    
+
     do {
         c = fgetc(crlFileCert);
         if (feof(crlFileCert)) {
@@ -95,10 +118,8 @@ void Certifier(Certificate* readCert) {
     }
 
     fclose(crlHash);
-
-
-
-   return;
+    
+    return;
 }
 
 // A function to read the certificate from a file
@@ -142,34 +163,35 @@ void readCertificate(const char *filename, Certificate *cert) {
     fclose(file);
 }
 
-bool verifyCert(Certificate* cert, char* currentDate, unsigned char currentHash) {
+int verifyCert(Certificate* cert, char* currentDate, unsigned char currentHash) {
     //returns true if cert is valid, false otherwise
-    
-    
+    int valid = 1;
+
     //Check if current date is before "valid not before" date
     if (strcmp(cert->validityNotBefore, currentDate) > 0) {
         printf("Cert is not valid. Current date is before certificate validity start.\n");
-        return false;
+        valid = 0;
     }
 
     //Check if current date is after "valid not after" date
     if (strcmp(cert->validityNotAfter, currentDate) < 0) {
         printf("Cert is not valid. Current date is after certificate validity end.\n");
-        return false;
+        valid = 0;
     }
-
 
     //Check if certificate hashes to the same value
     FILE* hashFile = fopen("certHash.txt", "r");
+    if (!hashFile) {
+        printf("Error opening certificate hash\n");
+    }
     char storedHash = fgetc(hashFile);
-    
     fclose(hashFile);
 
     if (storedHash != currentHash) {
+        printf("Cert hashes to: %c\n", currentHash);
         printf("Cert is not valid. Cert has been modified - hashes do not match.\n");
-        return false;
+        valid = 0;
     }
-
 
     //Check if certificate is in CRL list
     char revoked;
@@ -177,11 +199,13 @@ bool verifyCert(Certificate* cert, char* currentDate, unsigned char currentHash)
     while ((revoked = fgetc(revokationList)) != EOF) {
         if(storedHash == revoked) {
             printf("Cert is not valid. Cert appears on Certificate Revocation List.\n");
-            return false;
+            printf("valid = %d", valid);
+            valid = 0;
+
         }
     }
 
-    return true;
+    return valid;
 }
 
 #endif

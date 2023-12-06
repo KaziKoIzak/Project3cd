@@ -88,13 +88,12 @@ int main(int argc , char *argv[])
 	}
 		
 // *********** This is the line you need to edit ****************
-	server.sin_addr.s_addr = inet_addr("0.0.0.0");  // doesn't like localhost?
+	server.sin_addr.s_addr = inet_addr("169.254.44.150");  // doesn't like localhost?
 	server.sin_family = AF_INET;
 	server.sin_port = htons( 8421 );    // random "high"  port number
 
 	//Connect to remote server
-	if (connect(socket_desc , (struct sockaddr *)&server , sizeof(server)) < 0)
-	{
+	if (connect(socket_desc , (struct sockaddr *)&server , sizeof(server)) < 0) {
 		printf(" connect error");
 		return 1;
 	}
@@ -131,12 +130,30 @@ int main(int argc , char *argv[])
 	copyerArray(array);
 	keys();
 
+
+	//receive certificate from Server and write to file "certificate.txt"
 	Certificate recievedCertificat;
 	char buffend[sizeof(Certificate)];
 	recv(socket_desc, buffend, sizeof(buffend), 0);
 	deserializeCertificate(buffend, &recievedCertificat);
+	//printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n", recievedCertificat.version, recievedCertificat.serialNumber, recievedCertificat.signatureAlgorithm, recievedCertificat.issuer, recievedCertificat.validityNotBefore, recievedCertificat.validityNotAfter, recievedCertificat.subject, recievedCertificat.subjectPublicKeyInfo, recievedCertificat.trustLevel);
+	writeCertificate("certificate.txt", &recievedCertificat);
 
-	printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s", recievedCertificat.version, recievedCertificat.serialNumber, recievedCertificat.signatureAlgorithm, recievedCertificat.issuer, recievedCertificat.validityNotBefore, recievedCertificat.validityNotAfter, recievedCertificat.subject, recievedCertificat.subjectPublicKeyInfo, recievedCertificat.trustLevel);
+
+	
+	//receive CRL from Server and write to file "CRL.txt"
+	FILE *file = fopen("CRL.txt", "w");
+	char buffede[1024];
+	ssize_t recievedChars;
+	recievedChars = recv(socket_desc, buffede, sizeof(buffede), 0);
+	//printf("received %zd chars: %s\n", recievedChars, buffede);
+	fprintf(file, "%s", buffede);
+	
+	fclose(file);
+
+
+	//certify certificate
+	Certifier(&recievedCertificat);
 
 	//Get data from keyboard and send  to server
 	printf("What do you want to send to the server. (b for bye)\n");
