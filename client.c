@@ -148,12 +148,16 @@ int main(int argc , char *argv[])
 	recievedChars = recv(socket_desc, buffede, sizeof(buffede), 0);
 	//printf("received %zd chars: %s\n", recievedChars, buffede);
 	fprintf(file, "%s", buffede);
+	int CRLsize = sizeof(buffede);
+	printf("CRL size: %d", CRLsize);
+
+	fprintf(file, "%c", '\0');
 	
 	fclose(file);
 
 
 	//certify certificate
-	Certifier(&recievedCertificat);
+	Certifier(&recievedCertificat, CRLsize);
 
 	//Get data from keyboard and send  to server
 	printf("What do you want to send to the server. (b for bye)\n");

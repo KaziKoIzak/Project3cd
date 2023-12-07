@@ -21,7 +21,7 @@ typedef struct {
 
 // A function to read the certificate from a file
 void readCertificate(const char *filename, Certificate *cert);
-int verifyCert(Certificate* cert, char* currentDate, unsigned char currentHash);
+int verifyCert(Certificate* cert, char* currentDate, unsigned char currentHash, int CRLsize);
 void writeCertificate(const char *filename, const Certificate* cert);
 
 void writeCertificate(const char *filename, const Certificate* cert) {
@@ -44,7 +44,7 @@ void writeCertificate(const char *filename, const Certificate* cert) {
     fclose(file);
 }
 
-void Certifier(Certificate* readCert) {
+void Certifier(Certificate* readCert, int CRLsize) {
     //Manually change the "current date" to check if certificate is within its valid timeframe
     char currentDate[] = "20231205092956";// YYYY MM DD HH MM SS
 
@@ -76,7 +76,7 @@ void Certifier(Certificate* readCert) {
     fclose(hashFileCert);
 
     unsigned char uch = ch;
-    int certIsValid = verifyCert(readCert, currentDate, uch);
+    int certIsValid = verifyCert(readCert, currentDate, uch, CRLsize);
     printf("verification function returned %d", certIsValid);
 
     if (certIsValid == 1) {
@@ -163,7 +163,7 @@ void readCertificate(const char *filename, Certificate *cert) {
     fclose(file);
 }
 
-int verifyCert(Certificate* cert, char* currentDate, unsigned char currentHash) {
+int verifyCert(Certificate* cert, char* currentDate, unsigned char currentHash, int CRLsize) {
     //returns true if cert is valid, false otherwise
     int valid = 1;
 
@@ -196,14 +196,26 @@ int verifyCert(Certificate* cert, char* currentDate, unsigned char currentHash) 
     //Check if certificate is in CRL list
     char revoked;
     FILE* revokationList = fopen("CRL.txt", "r");
-    while ((revoked = fgetc(revokationList)) != EOF) {
+
+    printf("%d", CRLsize);
+    for (int i = 0; i < CRLsize; i++) {
+        //printf("revoked: %c\n", revoked);
         if(storedHash == revoked) {
             printf("Cert is not valid. Cert appears on Certificate Revocation List.\n");
             printf("valid = %d", valid);
             valid = 0;
-
         }
     }
+
+    /*
+    while ((revoked = fgetc(revokationList)) != '\0') {
+        printf("revoked: %c\n", revoked);
+        if(storedHash == revoked) {
+            printf("Cert is not valid. Cert appears on Certificate Revocation List.\n");
+            printf("valid = %d", valid);
+            valid = 0;
+        }
+    } */
 
     return valid;
 }
